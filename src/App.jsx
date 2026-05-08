@@ -46,7 +46,9 @@ function App() {
   // 3. EFECTO CRÍTICO: Detectar cambio de canción
   useEffect(() => {
     if (currentSong && audioRef.current) {
-      audioRef.current.load() // Forzar la carga del nuevo archivo src
+      console.log('Cargando canción:', currentSong.src)
+      // Quitar load() para evitar doble carga
+      // audioRef.current.load() // Forzar la carga del nuevo archivo src
       
       // Aplicar dispositivo de salida si soportado
       if (selectedDevice && audioRef.current.setSinkId) {
@@ -55,7 +57,7 @@ function App() {
       
       // Opcional: Si quieres que suene apenas la selecciones
       if (isPlaying) {
-        audioRef.current.play().catch(e => console.log("Esperando interacción..."))
+        audioRef.current.play().catch(e => console.log("Esperando interacción...", e))
       }
     }
   }, [currentSong, selectedDevice]) // Agregamos selectedDevice como depe ndencia
@@ -67,46 +69,27 @@ function App() {
     }
   }, [volume])
 
-  // 5. Escuchar eventos de tiempo del audio
+  // 6. Actualizar tiempo manualmente si timeupdate no funciona
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
+    if (!isPlaying) return
 
-    const updateTime = () => {
-      setCurrentTime(audio.currentTime)
-    }
-    
-    const updateDuration = () => {
-      console.log('Duración actualizada:', audio.duration)
-      setDuration(audio.duration)
-    }
+    const interval = setInterval(() => {
+      if (audioRef.current) {
+        setCurrentTime(audioRef.current.currentTime)
+      }
+    }, 100) // Actualizar cada 100ms
 
-    const handlePlay = () => {
-      setIsPlaying(true)
-    }
-
-    const handlePause = () => {
-      setIsPlaying(false)
-    }
-
-    audio.addEventListener('timeupdate', updateTime)
-    audio.addEventListener('loadedmetadata', updateDuration)
-    audio.addEventListener('durationchange', updateDuration)
-    audio.addEventListener('play', handlePlay)
-    audio.addEventListener('pause', handlePause)
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime)
-      audio.removeEventListener('loadedmetadata', updateDuration)
-      audio.removeEventListener('durationchange', updateDuration)
-      audio.removeEventListener('play', handlePlay)
-      audio.removeEventListener('pause', handlePause)
-    }
-  }, [])
+    return () => clearInterval(interval)
+  }, [isPlaying])
 
   const playMusic = () => {
-    audioRef.current.play()
-    setIsPlaying(true)
+    console.log('Intentando reproducir')
+    audioRef.current.play().then(() => {
+      console.log('Reproduciendo')
+      setIsPlaying(true)
+    }).catch(e => {
+      console.error('Error al reproducir:', e)
+    })
   }
 
   const pauseMusic = () => {
@@ -120,17 +103,23 @@ function App() {
     setCurrentTime(0) // Reiniciar el tiempo
   }
 
-  // Función para convertir segundos a formato MM:SS
+  // Función para convertir segundos a formato HH:MM:SS o MM:SS
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return '0:00'
-    const mins = Math.floor(seconds / 60)
+    const hours = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
     const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+    if (hours > 0) {
+      return `${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`
+    } else {
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+    }
   }
 
   // Función para manejar el cambio de progreso
   const handleProgressChange = (e) => {
     const newTime = parseFloat(e.target.value)
+    console.log('Cambiando tiempo a:', newTime)
     setCurrentTime(newTime)
     if (audioRef.current) {
       audioRef.current.currentTime = newTime
@@ -162,6 +151,7 @@ function App() {
           <audio 
             ref={audioRef} 
             src={currentSong.src} 
+            preload="metadata"
             onEnded={() => {
               if (loop) {
                 audioRef.current.currentTime = 0
@@ -169,6 +159,12 @@ function App() {
               } else {
                 setIsPlaying(false)
               }
+            }}
+            onError={(e) => console.error('Error en audio:', e)}
+            onLoadStart={() => console.log('Iniciando carga de audio')}
+            onCanPlay={() => {
+              console.log('Audio listo para reproducir')
+              setDuration(audioRef.current.duration)
             }}
           />
           <button onClick={playMusic} disabled={isPlaying}>Play</button>

@@ -9,12 +9,16 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webSecurity: false
     }
   });
 
   // En desarrollo, carga desde Vite dev server
   win.loadURL('http://localhost:5173');
+
+  // Abrir DevTools automáticamente para ver logs
+  win.webContents.openDevTools();
 
   // Para producción, usar win.loadFile(path.join(__dirname, '../dist/index.html'));
 }
@@ -37,6 +41,7 @@ ipcMain.handle('get-songs', async () => {
     .filter(file => file.endsWith(".mp3"))
     .map(file => ({
       title: file,
-      src: `file://${path.join(musicPath, file).replace(/\\/g, '/')}`
+      // En desarrollo usaremos el mismo host/puerto que Vite
+      src: `http://localhost:5173/music/${file}`
     }));
 });
