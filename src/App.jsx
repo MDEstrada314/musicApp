@@ -128,7 +128,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>🎵 MusicPlay</h1>
+      <h1>🎵 SaraMusic</h1>
       
       <div className="song-list">
         {songs.length > 0 ? (
