@@ -18,7 +18,7 @@ function createWindow() {
   win.loadURL('http://localhost:5173');
 
   // Abrir DevTools automáticamente para ver logs
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools(); 
 
   // Para producción, usar win.loadFile(path.join(__dirname, '../dist/index.html'));
 }
