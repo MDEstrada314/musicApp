@@ -239,7 +239,7 @@ function App() {
 
           {/* Control de volumen */}
           <div className="volume-control">
-            <label>Volumen: {Math.round(volume * 100)}%</label>
+            <label>{Math.round(volume * 100)}%</label>
             <input 
               type="range" 
               min="0" 
@@ -247,7 +247,11 @@ function App() {
               step="0.01" 
               value={volume} 
               onChange={(e) => setVolume(parseFloat(e.target.value))} 
+              style={{
+                background: `linear-gradient(to top, #FF4848 ${volume * 100}%, #444 ${volume * 100}%)`
+              }}
             />
+            <p>Volumen</p>
           </div>
       </div>
 

@@ -67,17 +67,50 @@ body{
 }
 
 .volume-control {
-  margin-top: 10px;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+  height: 40vh;
 }
 
 .volume-control label {
-  display: block;
+  display: flex;
   margin-bottom: 5px;
 }
 
 .volume-control input {
   width: 100%;
 }
+
+.volume-control input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+
+  writing-mode: vertical-lr;
+  direction: rtl;
+
+  width: 6px;
+  height: 40vh;
+  border-radius: 10px;
+}
+
+/* Thumb */
+.volume-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #FF4848;
+  cursor: pointer;
+}
+
+.volume-control input[type="range"]::-moz-range-progress {
+  border-radius: 10px;
+}
+
+
 
 .audio-output-control {
   margin-top: 10px;
@@ -221,6 +254,7 @@ body{
 .song-list {
   width: 80%;
   height: 40vh;
+  
   overflow-y: auto;
   background-color: #1E1D1D;
   border-radius: 8px;
@@ -233,6 +267,11 @@ body{
 
   button{
     border: none;
+    width: 100%; /* ajuste de texto*/
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  
   }
 }
 
