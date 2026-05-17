@@ -2,6 +2,10 @@ import "./App.css"
 import { useEffect, useRef, useState } from "react"
 const { ipcRenderer } = window.require("electron")
 
+import playIcon from "./assets/icons/fi-sr-play.svg";
+import pauseIcon from "./assets/icons/fi-sr-pause.svg";
+import loopIcon from "./assets/icons/fi-br-refresh.svg";
+
 function App() {
   const audioRef = useRef(null)
   const [songs, setSongs] = useState([])
@@ -197,7 +201,7 @@ function App() {
               disabled={isPlaying}
               className={`button ${isPlaying ? "active" : ""}`}
             >
-              <img src="/icons/fi-sr-play.svg" alt="Play" /> Play
+              <img src={playIcon} alt="Play" /> Play
             </button>
 
             <button
@@ -205,14 +209,14 @@ function App() {
               disabled={!isPlaying}
               className={`button ${!isPlaying ? "active" : ""}`}
             >
-              <img src="/icons/fi-sr-pause.svg" alt="Pause" /> Pause
+              <img src={pauseIcon} alt="Pause" /> Pause
             </button>
 
             <button
               onClick={() => setLoop(!loop)}
               className={`button ${loop ? "active" : ""}`}
             >
-              <img src="/icons/fi-br-refresh.svg" alt="Loop" />
+              <img src={loopIcon} alt="Loop" />
             </button>
           </div>
 
