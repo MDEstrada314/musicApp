@@ -131,7 +131,7 @@ function App() {
     <div className="app-container">
       <div className="heder">
       <h1 className="title"><span>Sara</span>Music</h1>
-                {/* Selector de salida de audio */}
+          {/* Selector de salida de audio */}
           {audioDevices.length > 0 && (
             <div className="audio-output-control">
               <select 
