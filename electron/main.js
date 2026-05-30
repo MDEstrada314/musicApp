@@ -20,14 +20,12 @@ function createWindow() {
     }
   });
 
-  // DESARROLLO
   if (!app.isPackaged) {
 
     win.loadURL("http://localhost:5173");
 
   } else {
 
-    // PRODUCCIÓN
     win.loadFile(path.join(rootDir, "dist", "index.html"));
 
   }
@@ -39,10 +37,12 @@ app.whenReady().then(createWindow);
 // REACT OBTIENE LAS CANCIONES
 ipcMain.handle("get-songs", async () => {
 
-  const musicPath = path.join(rootDir, "public", "music");
+  // Carpeta Documentos/Music
+  const musicPath = path.join(app.getPath("documents"), "Music");
 
+  // Crear carpeta automáticamente si no existe
   if (!fs.existsSync(musicPath)) {
-    return [];
+    fs.mkdirSync(musicPath, { recursive: true });
   }
 
   const files = fs.readdirSync(musicPath);
@@ -51,12 +51,6 @@ ipcMain.handle("get-songs", async () => {
     .filter(file => file.endsWith(".mp3"))
     .map(file => ({
       title: file,
-
-      // DESARROLLO
-      src: !app.isPackaged
-        ? `http://localhost:5173/music/${file}`
-
-        // PRODUCCIÓN
-        : pathToFileURL(path.join(musicPath, file)).href
+      src: pathToFileURL(path.join(musicPath, file)).href
     }));
 });
