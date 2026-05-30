@@ -2,6 +2,10 @@ import "./App.css"
 import { useEffect, useRef, useState } from "react"
 const { ipcRenderer } = window.require("electron")
 
+import playIcon from "./assets/icons/fi-sr-play.svg";
+import pauseIcon from "./assets/icons/fi-sr-pause.svg";
+import loopIcon from "./assets/icons/fi-br-refresh.svg";
+
 function App() {
   const audioRef = useRef(null)
   const [songs, setSongs] = useState([])
@@ -13,6 +17,7 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0) // Tiempo actual en segundos
   const [duration, setDuration] = useState(0) // Duración total en segundos
   const [loop, setLoop] = useState(false) // Estado de bucle
+  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   // 1. Carga inicial de canciones
   useEffect(() => {
@@ -128,25 +133,48 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>🎵 SaraMusic</h1>
-      
-      <div className="song-list">
-        {songs.length > 0 ? (
-          songs.map((song, index) => (
-            <div key={index} className={`song-item ${currentSong?.title === song.title ? 'active' : ''}`}>
-              <button onClick={() => handleSelectSong(song)}>
-                {song.title}
-              </button>
+      <div className="heder">
+      <h1 className="title"><span>Sara</span>Music</h1>
+          {/* Selector de salida de audio */}
+          {audioDevices.length > 0 && (
+            <div className="audio-output-control">
+              <select 
+                value={selectedDevice} 
+                onChange={(e) => setSelectedDevice(e.target.value)}
+              >
+                {audioDevices.map(device => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
+                  </option>
+                ))}
+              </select>
             </div>
-          ))
-        ) : (
-          <p>Buscando canciones en /public/music...</p>
-        )}
-      </div>
+          )}
 
+      </div>
+      
       {currentSong && (
         <div className="player-controls">
-          <h3>Reproduciendo: {currentSong.title}</h3>
+          <h3 className="nameMusic"> <span>Titulo:</span>{currentSong.title}</h3>
+
+          {/* Barra de progreso */}
+          <div className="time-display">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+          <div className="progress-control">
+            <input 
+              type="range" 
+              min="0" 
+              max={duration || 0} 
+              step="0.1" 
+              value={currentTime} 
+              onChange={handleProgressChange}
+              className="progress-bar"
+              style={{ '--progress': `${progressPercentage}%` }}
+            />
+          </div>
+
           {/* Añadimos onEnded para que sepas cuando termina */}
           <audio 
             ref={audioRef} 
@@ -166,33 +194,56 @@ function App() {
               console.log('Audio listo para reproducir')
               setDuration(audioRef.current.duration)
             }}
-          />
-          <button onClick={playMusic} disabled={isPlaying}>Play</button>
-          <button onClick={pauseMusic} disabled={!isPlaying}>Pause</button>
-          <button onClick={() => setLoop(!loop)} className={`loop-button ${loop ? 'active' : ''}`}>
-            🔁 Bucle
-          </button>
-          
-          {/* Barra de progreso */}
-          <div className="progress-control">
-            <input 
-              type="range" 
-              min="0" 
-              max={duration || 0} 
-              step="0.1" 
-              value={currentTime} 
-              onChange={handleProgressChange}
-              className="progress-bar"
-            />
-            <div className="time-display">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
+                    />
+          <div className="containerBotton">
+            <button
+              onClick={playMusic}
+              disabled={isPlaying}
+              className={`button ${isPlaying ? "active" : ""}`}
+            >
+              <img src={playIcon} alt="Play" /> Play
+            </button>
+
+            <button
+              onClick={pauseMusic}
+              disabled={!isPlaying}
+              className={`button ${!isPlaying ? "active" : ""}`}
+            >
+              <img src={pauseIcon} alt="Pause" /> Pause
+            </button>
+
+            <button
+              onClick={() => setLoop(!loop)}
+              className={`button ${loop ? "active" : ""}`}
+            >
+              <img src={loopIcon} alt="Loop" />
+            </button>
           </div>
+
           
+
+        </div>
+      )}
+
+      <div className="song-list-container">
+          {/* Lista de canciones */}
+          <div className="song-list">
+            {songs.length > 0 ? (
+              songs.map((song, index) => (
+                <div key={index} className={`song-item ${currentSong?.title === song.title ? 'active' : ''}`}>
+                  <button onClick={() => handleSelectSong(song)}>
+                    {song.title}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p>Buscando canciones en /public/music...</p>
+            )}
+          </div>
+
           {/* Control de volumen */}
           <div className="volume-control">
-            <label>Volumen: {Math.round(volume * 100)}%</label>
+            <label>{Math.round(volume * 100)}%</label>
             <input 
               type="range" 
               min="0" 
@@ -200,27 +251,14 @@ function App() {
               step="0.01" 
               value={volume} 
               onChange={(e) => setVolume(parseFloat(e.target.value))} 
+              style={{
+                background: `linear-gradient(to top, #FF4848 ${volume * 100}%, #444 ${volume * 100}%)`
+              }}
             />
+            <p>Volumen</p>
           </div>
+      </div>
 
-          {/* Selector de salida de audio */}
-          {audioDevices.length > 0 && (
-            <div className="audio-output-control">
-              <label>Salida de audio:</label>
-              <select 
-                value={selectedDevice} 
-                onChange={(e) => setSelectedDevice(e.target.value)}
-              >
-                {audioDevices.map(device => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 }
